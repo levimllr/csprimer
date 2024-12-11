@@ -1,26 +1,27 @@
 package org.odl
 
-fun main(number: Long) {
-  val isValid = isValidLuhn(number)
+fun main(digits: String) {
+  val isValid = isValidLuhn(digits)
   if (isValid) {
-    println("$number is a valid Luhn number.")
+    println("$digits is a valid Luhn number.")
   } else {
-    println("$number is not a valid Luhn number.")
+    println("$digits is not a valid Luhn number.")
   }
 }
 
-fun isValidLuhn(number: Long): Boolean {
-  val numberList = number.toDigits()
-  val expectedCheckDigit = numberList.last()
-  val otherDigits = numberList.subList(0, numberList.size - 2).reversed().toMutableList()
+fun isValidLuhn(digits: String): Boolean {
+  val expectedCheckDigit = digits.last()
 
-  for (i in 0..otherDigits.size step 2) {
-    otherDigits[i] = otherDigits[i] * 2
-  }
-  val sum = otherDigits.reduce { a, b -> a + b }
-  val actualCheckDigit = (10 - sum % 10) % 10
+  val actualCheckDigit = digits
+    .dropLast(1)
+    .reversed()
+    .map(Char::digitToInt)
+    .mapIndexed { i, num ->
+      val factor = 2 - i % 2
+      num * factor / 10 + num * factor % 10
+    }
+    .sum()
+    .run{ 10 - this % 10 }
 
-  return expectedCheckDigit == actualCheckDigit
+  return expectedCheckDigit.digitToInt() == actualCheckDigit
 }
-
-fun Long.toDigits(): List<Int> = toString().map { it.toString().toInt() }
